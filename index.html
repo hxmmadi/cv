@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shaheen Al-Hammadi — Power Systems & Offensive Security</title>
+<meta name="description" content="Electrical engineer specialising in securing energy and infrastructure systems. HTB Global Rank #946. Based in Kuwait.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0c0b0f;--bg2:#13111a;--bg3:#1a1722;
+  --surface:rgba(212,175,137,.04);
+  --accent:#d4af89;--accent2:#b07a50;--accent3:#8b5e3c;
+  --glow:rgba(212,175,137,.08);
+  --text:#e8e2d8;--text2:rgba(232,226,216,.72);--muted:#6b6260;
+  --border:rgba(212,175,137,.12);--border2:rgba(212,175,137,.06);
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'Outfit',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--accent3) var(--bg)}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}ul{list-style:none}
+::selection{background:var(--accent);color:var(--bg)}
+body::after{content:'';position:fixed;inset:0;z-index:99999;pointer-events:none;opacity:.022;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px}
+
+.cur-d,.cur-r{position:fixed;border-radius:50%;pointer-events:none;z-index:100000;mix-blend-mode:difference}
+.cur-d{width:8px;height:8px;background:var(--accent);transition:width .22s,height .22s,margin .22s}
+.cur-r{width:36px;height:36px;border:1px solid var(--accent);opacity:.4;transition:width .28s,height .28s,margin .28s,opacity .28s}
+body.c-hover .cur-d{width:16px;height:16px;margin:-8px 0 0 -8px!important}
+body.c-hover .cur-r{width:52px;height:52px;margin:-26px 0 0 -26px!important;opacity:.6}
+@media(max-width:768px){.cur-d,.cur-r{display:none}body{cursor:auto}}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:10000;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(1.5rem,5vw,4rem);background:rgba(12,11,15,.7);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border2);transition:all .4s}
+nav.scrolled{background:rgba(12,11,15,.92)}
+.n-logo{font-family:var(--mono);font-weight:700;font-size:1rem;color:var(--accent);letter-spacing:1px}
+.n-logo span{color:var(--muted)}
+.n-links{display:flex;gap:clamp(.7rem,1.8vw,1.8rem)}
+.n-links a{font-family:var(--mono);font-size:.63rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);transition:color .3s;position:relative}
+.n-links a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:var(--accent);transition:width .3s}
+.n-links a:hover,.n-links a.active{color:var(--accent)}
+.n-links a:hover::after,.n-links a.active::after{width:100%}
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px}
+.hamburger s{display:block;width:22px;height:1.5px;background:var(--accent);transition:all .3s}
+@media(max-width:768px){
+  .n-links{position:fixed;top:64px;right:-100%;width:65%;height:calc(100vh - 64px);background:rgba(12,11,15,.96);backdrop-filter:blur(24px);flex-direction:column;padding:2.5rem 2rem;gap:1.8rem;transition:right .4s cubic-bezier(.4,0,.2,1);border-left:1px solid var(--border2)}
+  .n-links.open{right:0}.hamburger{display:flex}
+}
+
+#hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden;padding:0 clamp(1.5rem,6vw,8rem)}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.hero-grad{position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(to top,var(--bg),transparent);z-index:1;pointer-events:none}
+.hero-content{position:relative;z-index:2;max-width:820px}
+.hero-label{font-family:var(--mono);font-size:.65rem;letter-spacing:4px;text-transform:uppercase;color:var(--accent);margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem}
+.hero-label::before{content:'';width:40px;height:1px;background:var(--accent)}
+.hero-name{font-family:var(--serif);font-size:clamp(3.2rem,8vw,7rem);font-weight:900;line-height:1;letter-spacing:-2px;margin-bottom:.5em}
+.hero-name em{font-style:italic;font-weight:400;color:var(--accent);display:inline-block}
+.typed-w{font-family:var(--mono);font-size:clamp(.75rem,1.3vw,.92rem);color:var(--text2);letter-spacing:1px;margin-bottom:2rem;min-height:1.5em}
+.typed-w .caret{display:inline-block;width:2px;height:1em;background:var(--accent);margin-left:3px;vertical-align:text-bottom;animation:blink .65s steps(2) infinite}
+@keyframes blink{to{opacity:0}}
+.hero-intro{font-size:clamp(.92rem,1.2vw,1.05rem);color:var(--text2);max-width:580px;margin-bottom:2.5rem;line-height:1.8}
+.hero-cta{display:flex;gap:1rem;flex-wrap:wrap}
+.btn{font-family:var(--mono);font-size:.7rem;letter-spacing:2px;text-transform:uppercase;padding:.85em 2.2em;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;position:relative;overflow:hidden;transition:all .35s}
+.btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:var(--accent);transition:left .4s cubic-bezier(.4,0,.2,1);z-index:0}
+.btn:hover::before{left:0}.btn:hover{color:var(--bg)}.btn span{position:relative;z-index:1}
+.btn-solid{background:var(--accent);color:var(--bg)}.btn-solid::before{background:var(--accent2)}.btn-solid:hover{color:var(--text);border-color:var(--accent2)}
+.scroll-cue{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:.6rem}
+.scroll-cue span{font-family:var(--mono);font-size:.55rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
+.scroll-cue .line{width:1px;height:36px;background:linear-gradient(to bottom,var(--accent),transparent);animation:pulse-l 2.2s ease-in-out infinite}
+@keyframes pulse-l{0%,100%{opacity:.25;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.2)}}
+
+section{padding:clamp(5rem,12vh,9rem) clamp(1.5rem,6vw,8rem)}.s-alt{background:var(--bg2)}
+.s-label{font-family:var(--mono);font-size:.6rem;letter-spacing:5px;text-transform:uppercase;color:var(--accent2);margin-bottom:.6rem}
+.s-heading{font-family:var(--serif);font-size:clamp(2rem,4vw,3.2rem);font-weight:700;line-height:1.15;margin-bottom:.4rem}
+.s-line{width:48px;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));margin-bottom:2.5rem}
+
+.about-layout{display:grid;grid-template-columns:1fr 1fr;gap:clamp(2rem,5vw,5rem);max-width:1100px;margin:0 auto;align-items:start}
+@media(max-width:768px){.about-layout{grid-template-columns:1fr}}
+.about-text{font-size:.95rem;color:var(--text2);line-height:1.85}
+.about-text p+p{margin-top:1.2rem}.about-text strong{color:var(--text);font-weight:600}
+.about-right{display:flex;flex-direction:column;gap:1.5rem}
+.about-photo-wrap{position:relative;width:100%;aspect-ratio:1/1;max-width:220px;margin:0 auto}
+.about-photo-wrap img{width:100%;height:100%;object-fit:cover;display:block;border:1px solid var(--border);filter:grayscale(20%);transition:filter .4s}
+.about-photo-wrap:hover img{filter:grayscale(0%)}
+.about-photo-wrap::before{content:'';position:absolute;inset:-6px;border:1px solid var(--accent);opacity:.3;pointer-events:none}
+.about-photo-wrap::after{content:'';position:absolute;inset:-12px;border:1px solid var(--accent2);opacity:.12;pointer-events:none}
+.about-cards{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.a-card{background:var(--surface);border:1px solid var(--border);padding:1.4rem;position:relative;overflow:hidden;transition:border-color .3s,transform .3s}
+.a-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.a-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:0;background:var(--accent);transition:height .6s cubic-bezier(.23,1,.32,1)}
+.a-card.vis::before{height:100%}
+.a-card .val{font-family:var(--serif);font-size:1.55rem;font-weight:700;color:var(--accent);line-height:1.2}
+.a-card .lbl{font-family:var(--mono);font-size:.54rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:.2rem}
+
+/* Skills — description + tags only, no fake percentages */
+.skills-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;max-width:1200px;margin:0 auto}
+.sk-card{background:var(--surface);border:1px solid var(--border);padding:2rem 1.8rem;transition:border-color .3s,transform .3s}
+.sk-card:hover{border-color:var(--accent);transform:translateY(-3px)}
+.sk-icon{color:var(--accent);margin-bottom:1rem}
+.sk-card h3{font-family:var(--sans);font-weight:600;font-size:1.05rem;margin-bottom:.5rem}
+.sk-card p{font-size:.84rem;color:var(--text2);line-height:1.72;margin-bottom:1.2rem}
+.sk-tags{display:flex;flex-wrap:wrap;gap:.45rem}
+.sk-tag{font-family:var(--mono);font-size:.55rem;letter-spacing:1.5px;text-transform:uppercase;padding:.25em .7em;border:1px solid var(--border);color:var(--muted);transition:all .25s}
+.sk-tag:hover{border-color:var(--accent);color:var(--accent)}
+
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.8rem;max-width:1200px;margin:0 auto}
+.p-card{background:var(--surface);border:1px solid var(--border);padding:2.2rem 2rem;position:relative;overflow:hidden;cursor:pointer;transition:all .4s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d}
+.p-card:hover{border-color:var(--accent);box-shadow:0 20px 60px rgba(212,175,137,.06)}
+.p-num{font-family:var(--serif);font-size:4.5rem;font-weight:900;position:absolute;top:-.3rem;right:.6rem;color:rgba(212,175,137,.04);line-height:1;pointer-events:none}
+.p-badge{display:inline-block;font-family:var(--mono);font-size:.52rem;letter-spacing:2.5px;text-transform:uppercase;padding:.3em .9em;border:1px solid var(--accent2);color:var(--accent2);margin-bottom:.9rem}
+.p-card h3{font-family:var(--serif);font-size:1.2rem;font-weight:700;margin-bottom:.3rem}
+.p-date{font-family:var(--mono);font-size:.62rem;color:var(--muted);letter-spacing:1px;margin-bottom:.8rem}
+.p-teaser{font-size:.88rem;color:var(--text2);line-height:1.7;margin-bottom:1rem}
+.p-details{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.4,0,.2,1),opacity .35s;opacity:0}
+.p-card.open .p-details{max-height:340px;opacity:1}
+.p-details li{padding:.3rem 0 .3rem 1rem;position:relative;font-size:.85rem;color:var(--text2)}
+.p-details li::before{content:'\203A';position:absolute;left:0;color:var(--accent);font-weight:700}
+.p-toggle{font-family:var(--mono);font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:.4rem;transition:color .3s}
+.p-card:hover .p-toggle{color:var(--accent)}
+.p-toggle .arr{display:inline-block;transition:transform .3s;font-size:.7rem}
+.p-card.open .p-toggle .arr{transform:rotate(90deg)}
+
+.edu-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:860px;margin:0 auto}
+@media(max-width:768px){.edu-grid{grid-template-columns:1fr}}
+.edu-card{background:var(--surface);border:1px solid var(--border);padding:2rem;transition:border-color .3s,transform .3s}
+.edu-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.edu-deg{font-family:var(--serif);font-size:1.6rem;font-weight:700;color:var(--accent);margin-bottom:.1rem}
+.edu-school{font-size:1rem;color:var(--text);font-weight:600;margin-bottom:.2rem}
+.edu-field{font-size:.88rem;color:var(--text2);margin-bottom:.3rem}
+.edu-year{font-family:var(--mono);font-size:.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:.5rem}
+.edu-badge{display:inline-block;font-family:var(--mono);font-size:.52rem;letter-spacing:2px;text-transform:uppercase;padding:.28em .8em;border:1px solid var(--accent2);color:var(--accent2)}
+
+.tl{position:relative;max-width:750px;margin:0 auto;padding-left:2.8rem}
+.tl-line{position:absolute;top:0;bottom:0;left:10px;width:1.5px;background:var(--border)}
+.tl-line-f{width:100%;height:0;background:linear-gradient(to bottom,var(--accent),var(--accent2))}
+.tl-item{position:relative;padding-bottom:2.8rem}
+.tl-item:last-child{padding-bottom:0}
+.tl-dot{position:absolute;left:-2.35rem;top:.4rem;width:10px;height:10px;border-radius:50%;border:2px solid var(--accent);background:var(--bg);z-index:2}
+.tl-item.seen .tl-dot::after{content:'';position:absolute;inset:-5px;border-radius:50%;border:1px solid var(--accent);animation:rip 1.6s ease-out}
+@keyframes rip{0%{transform:scale(1);opacity:.5}100%{transform:scale(2.5);opacity:0}}
+.tl-date{font-family:var(--mono);font-size:.62rem;letter-spacing:2px;color:var(--accent2);text-transform:uppercase;margin-bottom:.2rem}
+.tl-item h3{font-family:var(--sans);font-weight:600;font-size:1.05rem;margin-bottom:.1rem}
+.tl-loc{font-family:var(--mono);font-size:.58rem;color:var(--muted);letter-spacing:1px;margin-bottom:.6rem}
+.tl-item li{padding:.2rem 0 .2rem 1rem;position:relative;font-size:.85rem;color:var(--text2)}
+.tl-item li::before{content:'\203A';position:absolute;left:0;color:var(--accent);font-weight:700}
+
+.lang-wrap{max-width:420px;margin:0 auto}
+.lang-row{margin-bottom:1.4rem}
+.lang-hdr{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--text);margin-bottom:.4rem}
+.lang-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.lang-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 1.2s cubic-bezier(.23,1,.32,1)}
+
+.contact-layout{display:grid;grid-template-columns:1fr 1.2fr;gap:clamp(2rem,5vw,4rem);max-width:900px;margin:0 auto;align-items:start}
+@media(max-width:768px){.contact-layout{grid-template-columns:1fr}}
+.c-row{display:flex;align-items:center;gap:1rem;padding:1.1rem 0;border-bottom:1px solid var(--border2)}
+.c-row:last-child{border-bottom:none}
+.c-icon{width:38px;height:38px;border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--accent)}
+.c-lbl{font-family:var(--mono);font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.c-val{font-size:.88rem;color:var(--text);margin-top:.1rem;word-break:break-word}
+.c-form{display:flex;flex-direction:column;gap:.85rem}
+.c-field{display:grid;grid-template-columns:60px 1fr;align-items:center;gap:.6rem}
+.c-field-msg{display:grid;grid-template-columns:60px 1fr;align-items:start;gap:.6rem}
+.c-form label{font-family:var(--mono);font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:right}
+.c-form input,.c-form textarea{background:var(--surface);border:1px solid var(--border);padding:.8rem 1rem;color:var(--text);font-family:var(--sans);font-size:.88rem;outline:none;transition:border-color .3s;border-radius:0;width:100%}
+.c-form input:focus,.c-form textarea:focus{border-color:var(--accent)}
+.c-form textarea{resize:vertical;min-height:110px}
+.c-form-actions{padding-left:calc(60px + .6rem)}
+.btn-send{position:relative}.btn-send.sent .btn-txt{opacity:0}
+.btn-send .btn-check{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.7rem;letter-spacing:2px;opacity:0;transition:opacity .3s;color:var(--bg);background:var(--accent)}
+.btn-send.sent .btn-check{opacity:1}
+.c-note{font-family:var(--mono);font-size:.55rem;color:var(--muted);letter-spacing:1px;margin-top:.8rem;line-height:1.6}
+
+footer{text-align:center;padding:2.5rem 1.5rem;border-top:1px solid var(--border2);font-family:var(--mono);font-size:.58rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+
+.rv{opacity:0;will-change:transform,opacity;transition:opacity .7s cubic-bezier(.23,1,.32,1),transform .7s cubic-bezier(.23,1,.32,1)}
+.rv-up{transform:translateY(32px)}.rv-left{transform:translateX(-28px)}.rv-right{transform:translateX(28px)}.rv-scale{transform:scale(.94)}
+.rv.vis{opacity:1;transform:none}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+
+@media(max-width:768px){
+  .about-cards{grid-template-columns:1fr 1fr}.proj-grid{grid-template-columns:1fr}
+  .tl{padding-left:2.2rem}.tl-dot{left:-1.8rem}
+  section{padding:clamp(3.5rem,8vh,5rem) clamp(1.2rem,5vw,2rem)}
+  .c-field,.c-field-msg{grid-template-columns:52px 1fr}.c-form-actions{padding-left:calc(52px + .6rem)}
+}
+@media(max-width:420px){.about-cards{grid-template-columns:1fr}.hero-name{font-size:clamp(2.4rem,11vw,3.6rem)}}
+</style>
+</head>
+<body>
+<div class="cur-d" id="cd"></div><div class="cur-r" id="cr"></div>
+
+<nav id="nav">
+  <div class="n-logo">shah<span>/</span>een</div>
+  <div class="n-links" id="nLinks">
+    <a href="#about">About</a>
+    <a href="#skills">Skills</a>
+    <a href="#projects">Projects</a>
+    <a href="#education">Education</a>
+    <a href="#experience">Experience</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <button class="hamburger" id="ham" aria-label="Menu"><s></s><s></s><s></s></button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-grad"></div>
+  <div class="hero-content">
+    <div class="hero-label rv rv-up">Power Systems &middot; Offensive Security &middot; Kuwait</div>
+    <h1 class="hero-name rv rv-up" style="transition-delay:.1s">Shaheen<br><em>Al-Hammadi</em></h1>
+    <div class="typed-w rv rv-up" style="transition-delay:.2s"><span id="typed"></span><span class="caret"></span></div>
+    <p class="hero-intro rv rv-up" style="transition-delay:.3s">I build energy systems — and find the gaps in them. My background in power electronics and ICS gives me an engineer's view of critical infrastructure that most security practitioners don't have. HTB Global Rank <strong style="color:var(--accent)">#946</strong>.</p>
+    <div class="hero-cta rv rv-up" style="transition-delay:.42s">
+      <a href="#projects" class="btn btn-solid"><span>See my work</span></a>
+      <a href="#contact" class="btn"><span>Get in touch</span></a>
+    </div>
+  </div>
+  <div class="scroll-cue rv rv-up" style="transition-delay:.7s"><span>Scroll</span><div class="line"></div></div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="s-alt">
+  <div class="s-label rv rv-up">About</div>
+  <h2 class="s-heading rv rv-up">Who I am</h2>
+  <div class="s-line rv rv-up"></div>
+  <div class="about-layout">
+    <div class="about-text rv rv-left">
+      <p>I'm an electrical engineer focused on the intersection of <strong>power systems and offensive security</strong> — specifically the question of how energy infrastructure can be compromised by someone who understands how it's built. I hold a <strong>BEng from University College Dublin</strong> (GPA 3.0+) and an <strong>MSc in Energy &amp; Power Systems from the University of Liverpool</strong>, completed with <strong>Distinction</strong>.</p>
+      <p>On the offensive side, I hold <strong>HTB Global Rank #946</strong>. I do CTF challenges, binary exploitation, and reverse engineering as a discipline — decompiling binaries, patching executables, and working through crackmes from the disassembly up. My writeups are public on Notion.</p>
+      <p>That combination is deliberate. Understanding how power infrastructure is engineered gives me a different lens when analysing how it fails under attack. I'm positioned for roles where both sides of that equation matter.</p>
+      <p style="margin-top:1.4rem"><a href="https://www.notion.so/278e7f8e988b80e5829cfd138d816fff?v=278e7f8e988b813dafae000c9683029a" target="_blank" rel="noopener" style="color:var(--accent);border-bottom:1px solid var(--border);padding-bottom:2px">View HTB Writeups on Notion &rarr;</a></p>
+    </div>
+    <div class="about-right rv rv-right">
+      <div class="about-photo-wrap">
+        <img src="photo.png" alt="Shaheen Al-Hammadi" onerror="this.parentElement.style.display='none'">
+      </div>
+      <div class="about-cards">
+        <div class="a-card rv rv-right" style="transition-delay:.1s"><div class="val">MSc</div><div class="lbl">Distinction '25</div></div>
+        <div class="a-card rv rv-right" style="transition-delay:.18s"><div class="val">BEng</div><div class="lbl">Dublin '24</div></div>
+        <div class="a-card rv rv-right" style="transition-delay:.26s"><div class="val">#946</div><div class="lbl">HTB Global</div></div>
+        <div class="a-card rv rv-right" style="transition-delay:.34s"><div class="val">KW</div><div class="lbl">Kuwait Based</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="s-label rv rv-up">Skills</div>
+  <h2 class="s-heading rv rv-up">What I work with</h2>
+  <div class="s-line rv rv-up"></div>
+  <div class="skills-grid">
+
+    <div class="sk-card rv rv-scale" style="transition-delay:.06s">
+      <div class="sk-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <h3>Offensive Security</h3>
+      <p>Penetration testing, network analysis, and vulnerability assessment across CTF platforms and real-target environments.</p>
+      <div class="sk-tags"><span class="sk-tag">Kali Linux</span><span class="sk-tag">BurpSuite</span><span class="sk-tag">Metasploit</span><span class="sk-tag">Wireshark</span><span class="sk-tag">Nmap</span><span class="sk-tag">HTB</span></div>
+    </div>
+
+    <div class="sk-card rv rv-scale" style="transition-delay:.12s">
+      <div class="sk-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+      <h3>Reverse Engineering</h3>
+      <p>Static and dynamic analysis of x86-64 binaries — disassembly, decompilation, memory inspection, and patch development from the ground up.</p>
+      <div class="sk-tags"><span class="sk-tag">IDA Pro</span><span class="sk-tag">Ghidra</span><span class="sk-tag">x86-64 ASM</span><span class="sk-tag">GDB / GEF</span><span class="sk-tag">Cheat Engine</span><span class="sk-tag">dnSpy</span></div>
+    </div>
+
+    <div class="sk-card rv rv-scale" style="transition-delay:.18s">
+      <div class="sk-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <h3>Power &amp; Energy Systems</h3>
+      <p>Simulation and control of power electronic converters, energy harvesting at the nanoscale, and model predictive control design.</p>
+      <div class="sk-tags"><span class="sk-tag">MATLAB</span><span class="sk-tag">Simulink</span><span class="sk-tag">MPC</span><span class="sk-tag">Power Electronics</span><span class="sk-tag">Energy Harvesting</span></div>
+    </div>
+
+    <div class="sk-card rv rv-scale" style="transition-delay:.24s">
+      <div class="sk-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
+      <h3>Hardware &amp; Wi-Fi Sensing</h3>
+      <p>Embedded systems programming, Wi-Fi physical-layer data extraction, and sensor integration on microcontroller platforms.</p>
+      <div class="sk-tags"><span class="sk-tag">ESP32</span><span class="sk-tag">ESP-IDF</span><span class="sk-tag">Wi-Fi CSI</span><span class="sk-tag">Raspberry Pi</span><span class="sk-tag">IoT Sensors</span><span class="sk-tag">pyserial</span></div>
+    </div>
+
+    <div class="sk-card rv rv-scale" style="transition-delay:.30s">
+      <div class="sk-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+      <h3>Programming &amp; Tooling</h3>
+      <p>Python for automation, signal processing, and data pipelines. C/C++ for low-level and embedded work. Comfortable across Linux and Windows targets.</p>
+      <div class="sk-tags"><span class="sk-tag">Python</span><span class="sk-tag">C / C++</span><span class="sk-tag">Bash</span><span class="sk-tag">Parrot OS</span><span class="sk-tag">Linux</span><span class="sk-tag">Ollama</span></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects" class="s-alt">
+  <div class="s-label rv rv-up">Projects</div>
+  <h2 class="s-heading rv rv-up">Selected work</h2>
+  <div class="s-line rv rv-up"></div>
+  <div class="proj-grid">
+
+    <div class="p-card rv rv-up" style="transition-delay:.06s" onclick="togProj(this)">
+      <div class="p-num">#01</div>
+      <span class="p-badge">Wi-Fi Security &middot; IoT</span>
+      <h3>ESP32 Wi-Fi CSI Data Capture</h3>
+      <div class="p-date">2025</div>
+    <p class="p-teaser">
+Captured Wi-Fi Channel State Information (CSI) using an ESP32-DevKit and built a pipeline to detect human movement through walls by analysing amplitude and phase variations across subcarriers.
+</p>
+
+<div class="p-details"><ul>
+<li>Captured and processed Wi-Fi CSI data using an ESP32 for real-world signal analysis</li>
+<li>Developed a Python pipeline to log and structure CSI data streams</li>
+<li>Analysed subcarrier-level amplitude and phase variations over time</li>
+<li>Detected human movement through indoor walls using CSI signal changes</li>
+<li>Ensured stable data capture across consistent Wi-Fi conditions</li>
+</ul></div>
+      <div class="p-toggle"><span class="arr">&rarr;</span> Details</div>
+    </div>
+
+    <div class="p-card rv rv-up" style="transition-delay:.12s" onclick="togProj(this)">
+      <div class="p-num">#02</div>
+      <span class="p-badge">Power Electronics</span>
+      <h3>Enhanced Model Predictive Control</h3>
+      <div class="p-date">Oct 2023 &mdash; Apr 2024</div>
+      <p class="p-teaser">Redesigned an MPC strategy for power electronic converters to handle real-world component drift — the failure mode that makes industrial converters unreliable in the field.</p>
+      <div class="p-details"><ul>
+        <li>Identified parameter mismatch as the primary instability source in standard MPC</li>
+        <li>Developed an adaptive correction loop compensating for component tolerance drift in real time</li>
+        <li>Achieved measurably more stable converter output vs baseline MPC in simulation</li>
+        <li>Directly applicable to inverters in renewable energy and grid-connected systems</li>
+      </ul></div>
+      <div class="p-toggle"><span class="arr">&rarr;</span> Details</div>
+    </div>
+
+    <div class="p-card rv rv-up" style="transition-delay:.18s" onclick="togProj(this)">
+      <div class="p-num">#03</div>
+      <span class="p-badge">Nanoelectronics &middot; MSc Thesis</span>
+      <h3>Resonant Tunnelling in MIIM Diodes</h3>
+      <div class="p-date">Jun 2025 &mdash; Sep 2025</div>
+      <p class="p-teaser">MSc thesis: modelled resonant tunnelling in MIIM diodes to evaluate THz-frequency energy harvesting potential from ambient radiation — relevant to self-powered ICS-adjacent sensors.</p>
+      <div class="p-details"><ul>
+        <li>Simulated quantum tunnelling characteristics across the MIIM insulator stack</li>
+        <li>Optimised barrier thickness and material parameters to maximise rectification efficiency</li>
+        <li>Demonstrated viable THz harvesting potential for wireless sensor nodes</li>
+        <li>Contributes to research in nanoscale energy harvesting for infrastructure IoT</li>
+      </ul></div>
+      <div class="p-toggle"><span class="arr">&rarr;</span> Details</div>
+    </div>
+
+    <div class="p-card rv rv-up" style="transition-delay:.24s" onclick="togProj(this)">
+      <div class="p-num">#04</div>
+      <span class="p-badge">Embedded &middot; IoT</span>
+      <h3>Obstacle Detection Stick</h3>
+      <div class="p-date">Jul &mdash; Aug 2018</div>
+      <p class="p-teaser">Ultrasonic navigation aid for visually impaired users — Raspberry Pi + Python, sub-1m detection range. Nominated top 10 at KISR research programme.</p>
+      <div class="p-details"><ul>
+        <li>Designed and built complete hardware prototype at KISR</li>
+        <li>Real-time ultrasonic ranging in Python on Raspberry Pi with haptic and audio feedback</li>
+        <li>1-metre detection range; reliable in testing across varied environments</li>
+        <li>Nominated top 10 across the full programme cohort</li>
+      </ul></div>
+      <div class="p-toggle"><span class="arr">&rarr;</span> Details</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education">
+  <div class="s-label rv rv-up">Education</div>
+  <h2 class="s-heading rv rv-up">Where I studied</h2>
+  <div class="s-line rv rv-up"></div>
+  <div class="edu-grid">
+    <div class="edu-card rv rv-up" style="transition-delay:.08s">
+      <div class="edu-deg">MSc</div>
+      <div class="edu-school">University of Liverpool</div>
+      <div class="edu-field">Energy &amp; Power Systems</div>
+      <div class="edu-year">Sep 2024 &mdash; Sep 2025</div>
+      <span class="edu-badge">Distinction</span>
+    </div>
+    <div class="edu-card rv rv-up" style="transition-delay:.16s">
+      <div class="edu-deg">BEng</div>
+      <div class="edu-school">University College Dublin</div>
+      <div class="edu-field">Electrical Engineering</div>
+      <div class="edu-year">Sep 2019 &mdash; Jun 2024</div>
+      <span class="edu-badge">GPA 3.0+</span>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience" class="s-alt">
+  <div class="s-label rv rv-up">Experience</div>
+  <h2 class="s-heading rv rv-up">Where I've worked</h2>
+  <div class="s-line rv rv-up"></div>
+  <div class="tl" id="tl">
+    <div class="tl-line"><div class="tl-line-f" id="tlFill"></div></div>
+    <div class="tl-item rv rv-left">
+      <div class="tl-dot"></div>
+      <div class="tl-date">Jul &mdash; Aug 2023</div>
+      <h3>H&amp;S Store &amp; Zain Telecom</h3>
+      <div class="tl-loc">Kuwait City</div>
+      <ul>
+        <li>Observed telecom device provisioning and network configuration workflows firsthand</li>
+        <li>Exposure to retail SIM and mobile network infrastructure operations</li>
+      </ul>
+    </div>
+    <div class="tl-item rv rv-left" style="transition-delay:.12s">
+      <div class="tl-dot"></div>
+      <div class="tl-date">Oct 2018</div>
+      <h3>Environmental Public Authority (EPA)</h3>
+      <div class="tl-loc">Kuwait City</div>
+      <ul>
+        <li>Conducted PLA-to-lactic-acid conversion research under lab specialist supervision</li>
+        <li>Operated industrial lab equipment under chemical safety protocols</li>
+      </ul>
+    </div>
+    <div class="tl-item rv rv-left" style="transition-delay:.24s">
+      <div class="tl-dot"></div>
+      <div class="tl-date">Jul &mdash; Aug 2018</div>
+      <h3>Kuwait Institute for Scientific Research (KISR)</h3>
+      <div class="tl-loc">Kuwait City</div>
+      <ul>
+        <li>Developed and programmed an embedded Raspberry Pi system for assistive technology</li>
+        <li>Project nominated top 10 across the full research cohort</li>
+        <li>Ran technical workshops on embedded development</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- LANGUAGES -->
+<section id="languages">
+  <div class="s-label rv rv-up" style="text-align:center">Languages</div>
+  <h2 class="s-heading rv rv-up" style="text-align:center">What I speak</h2>
+  <div class="s-line rv rv-up" style="margin:0 auto 2.5rem"></div>
+  <div class="lang-wrap">
+    <div class="lang-row rv rv-up"><div class="lang-hdr"><span>Arabic</span><span>Native</span></div><div class="lang-bar"><div class="lang-fill" data-w="100"></div></div></div>
+    <div class="lang-row rv rv-up" style="transition-delay:.1s"><div class="lang-hdr"><span>English</span><span>Advanced</span></div><div class="lang-bar"><div class="lang-fill" data-w="90"></div></div></div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="s-alt">
+  <div class="s-label rv rv-up">Contact</div>
+  <h2 class="s-heading rv rv-up">Get in touch</h2>
+  <div class="s-line rv rv-up"></div>
+  <div class="contact-layout">
+    <div class="rv rv-left">
+      <div class="c-row">
+        <div class="c-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+        <div><div class="c-lbl">Email</div><div class="c-val"><a href="mailto:ShaheenAlhammadiKw@gmail.com">ShaheenAlhammadiKw@gmail.com</a></div></div>
+      </div>
+      <div class="c-row">
+        <div class="c-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.11 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div>
+        <div><div class="c-lbl">Phone</div><div class="c-val">+965-65594164</div></div>
+      </div>
+      <div class="c-row">
+        <div class="c-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <div><div class="c-lbl">Location</div><div class="c-val">Kuwait</div></div>
+      </div>
+      <div class="c-row">
+        <div class="c-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+        <div><div class="c-lbl">HTB Writeups</div><div class="c-val"><a href="https://www.notion.so/278e7f8e988b80e5829cfd138d816fff?v=278e7f8e988b813dafae000c9683029a" target="_blank" rel="noopener" style="color:var(--accent);border-bottom:1px solid var(--border)">View on Notion &rarr;</a></div></div>
+      </div>
+    </div>
+    <div class="c-form rv rv-right" id="contactForm">
+      <div class="c-field">
+        <label for="cName">Name</label>
+        <input type="text" id="cName" placeholder="Your name" autocomplete="off">
+      </div>
+      <div class="c-field">
+        <label for="cEmail">Email</label>
+        <input type="email" id="cEmail" placeholder="Your email" autocomplete="off">
+      </div>
+      <div class="c-field-msg">
+        <label for="cMsg" style="padding-top:.85rem">Message</label>
+        <textarea id="cMsg" placeholder="What's on your mind?"></textarea>
+      </div>
+      <div class="c-form-actions">
+        <button class="btn btn-solid btn-send" id="sendBtn" onclick="handleSend()">
+          <span class="btn-txt">Send Message</span>
+          <span class="btn-check">Sent &#10003;</span>
+        </button>
+        <div class="c-note">Clicking Send opens your email client with the message pre-filled.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>&copy; 2025 Shaheen Al-Hammadi &middot; Built static. Zero attack surface.</footer>
+
+<script>
+(()=>{
+  if(window.innerWidth<769)return;
+  const d=document.getElementById('cd'),r=document.getElementById('cr');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
+  (function loop(){
+    d.style.left=mx+'px';d.style.top=my+'px';d.style.margin='-4px 0 0 -4px';
+    rx+=(mx-rx)*.1;ry+=(my-ry)*.1;
+    r.style.left=rx+'px';r.style.top=ry+'px';r.style.margin='-18px 0 0 -18px';
+    requestAnimationFrame(loop)
+  })();
+  document.querySelectorAll('a,button,.p-card,.sk-card,.a-card,.edu-card,input,textarea').forEach(el=>{
+    el.addEventListener('mouseenter',()=>document.body.classList.add('c-hover'));
+    el.addEventListener('mouseleave',()=>document.body.classList.remove('c-hover'))
+  })
+})();
+
+document.getElementById('ham').onclick=()=>document.getElementById('nLinks').classList.toggle('open');
+document.querySelectorAll('.n-links a').forEach(a=>a.addEventListener('click',()=>document.getElementById('nLinks').classList.remove('open')));
+window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',window.scrollY>60)},{passive:true});
+
+(()=>{
+  const c=document.getElementById('hero-canvas'),ctx=c.getContext('2d');
+  let W,H,pts=[],mouse={x:-9e3,y:-9e3};
+  const resize=()=>{W=c.width=c.offsetWidth;H=c.height=c.offsetHeight};
+  resize();window.addEventListener('resize',resize);
+  const N=window.innerWidth>768?55:22;
+  for(let i=0;i<N;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*1.8+.6,ox:0,oy:0});
+  c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top});
+  c.addEventListener('mouseleave',()=>{mouse.x=-9e3;mouse.y=-9e3});
+  (function draw(){
+    ctx.clearRect(0,0,W,H);
+    for(let i=0;i<pts.length;i++){
+      const p=pts[i],dx=mouse.x-p.x,dy=mouse.y-p.y,dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<150){const f=(150-dist)/150*.8;p.ox+=dx*f*.012;p.oy+=dy*f*.012}
+      p.ox*=.93;p.oy*=.93;p.x+=p.vx+p.ox;p.y+=p.vy+p.oy;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(212,175,137,.28)';ctx.fill();
+      for(let j=i+1;j<pts.length;j++){
+        const q=pts[j],dd=Math.hypot(p.x-q.x,p.y-q.y);
+        if(dd<120){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle='rgba(212,175,137,'+(0.09*(1-dd/120))+')';ctx.lineWidth=.5;ctx.stroke()}
+      }
+    }
+    requestAnimationFrame(draw)
+  })()
+})();
+
+(()=>{
+  const el=document.getElementById('typed');
+  const lines=['Power Systems Engineer','Infrastructure Security Researcher','Reverse Engineer \u00B7 HTB #946','Offensive Security Practitioner','Electrical Engineer'];
+  let li=0,ci=0,del=false;
+  (function tick(){
+    const w=lines[li];
+    if(!del){el.textContent=w.slice(0,++ci);if(ci>=w.length){setTimeout(()=>{del=true;tick()},2200);return}setTimeout(tick,60+Math.random()*35)}
+    else{el.textContent=w.slice(0,--ci);if(ci<0){del=false;ci=0;li=(li+1)%lines.length;setTimeout(tick,350);return}setTimeout(tick,28)}
+  })()
+})();
+
+(()=>{
+  const obs=new IntersectionObserver((es,o)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');o.unobserve(e.target)}})},{threshold:.1});
+  document.querySelectorAll('.rv').forEach(r=>obs.observe(r))
+})();
+
+(()=>{
+  const secs=document.querySelectorAll('section[id]'),links=document.querySelectorAll('.n-links a');
+  const o=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector('.n-links a[href="#'+e.target.id+'"]');if(a)a.classList.add('active')}})},{rootMargin:'-35% 0px -60% 0px'});
+  secs.forEach(s=>o.observe(s))
+})();
+
+(()=>{
+  const obs=new IntersectionObserver((es,o)=>{es.forEach(e=>{if(e.isIntersecting){e.target.style.width=e.target.dataset.w+'%';o.unobserve(e.target)}})},{threshold:.25});
+  document.querySelectorAll('.lang-fill').forEach(b=>obs.observe(b))
+})();
+
+(()=>{
+  const tl=document.getElementById('tl'),fill=document.getElementById('tlFill');
+  if(!tl||!fill)return;
+  const items=tl.querySelectorAll('.tl-item');
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('seen')})},{threshold:.15});
+  items.forEach(i=>obs.observe(i));
+  (function up(){
+    const r=tl.getBoundingClientRect(),scrolled=Math.max(0,-r.top+window.innerHeight*.45);
+    fill.style.height=Math.min(100,scrolled/tl.scrollHeight*100)+'%';
+    requestAnimationFrame(up)
+  })()
+})();
+
+function togProj(c){c.classList.toggle('open')}
+
+(()=>{
+  if(window.innerWidth<769)return;
+  document.querySelectorAll('.p-card').forEach(card=>{
+    card.addEventListener('mousemove',e=>{
+      const r=card.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+      const ry=((x-r.width/2)/r.width)*6,rx=((r.height/2-y)/r.height)*6;
+      card.style.transform=`perspective(600px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-3px)`;
+    });
+    card.addEventListener('mouseleave',()=>{card.style.transform=''});
+  })
+})();
+
+function handleSend(){
+  const name=document.getElementById('cName').value.trim();
+  const email=document.getElementById('cEmail').value.trim();
+  const msg=document.getElementById('cMsg').value.trim();
+  if(!name||!email||!msg){
+    [['cName',name],['cEmail',email],['cMsg',msg]].forEach(([id,val])=>{
+      if(!val){
+        const el=document.getElementById(id);
+        el.style.borderColor='var(--accent2)';
+        el.style.animation='shake .35s ease';
+        setTimeout(()=>{el.style.borderColor='';el.style.animation=''},450);
+      }
+    });
+    return;
+  }
+  const subject=encodeURIComponent('Portfolio inquiry from '+name);
+  const body=encodeURIComponent('Name: '+name+'\nEmail: '+email+'\n\n'+msg);
+  window.location.href='mailto:ShaheenAlhammadiKw@gmail.com?subject='+subject+'&body='+body;
+  const btn=document.getElementById('sendBtn');
+  btn.classList.add('sent');
+  setTimeout(()=>btn.classList.remove('sent'),3500);
+}
+</script>
+</body>
+</html>
